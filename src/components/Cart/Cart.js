@@ -1,6 +1,6 @@
 import styles from "./Cart.module.css";
 import Modal from "../UI/Modal";
-import {useContext, useState} from "react";
+import React, {useContext, useState} from "react";
 import CartContext from "../../store/cart-context";
 import CartItem from "./CartItem";
 import SubmitOrder from "./SubmitOrder";
@@ -10,6 +10,9 @@ const Cart = props => {
   const totalAmount = `$${Math.abs(cartContext.totalAmount).toFixed(2)}`;
   const hasItems = cartContext.items.length > 0;
   const [isSubmitOrderAvailable, setIsSubmitOrderAvailable] = useState(false);
+  const [isDataSubmitting, setIsDataSubmitting] = useState(false);
+  const [wasDataSendingSuccessful, setWasDataSendingSuccessful] = useState(false);
+
 
   const removeCartItemHandler = id => {
     cartContext.removeItem(id);
@@ -23,16 +26,23 @@ const Cart = props => {
     setIsSubmitOrderAvailable(true);
   }
 
-  const submitOrderHandler = userData =>  {
+  const submitOrderHandler = async userData =>  {
     const endPoint = "https://sushi-delivery-30647-default-rtdb.firebaseio.com/orders.json";
-    console.log("fetch");
-    fetch(endPoint, {
+
+    setIsDataSubmitting(true);
+
+
+    await fetch(endPoint, {
       method: "POST",
       body: JSON.stringify({
         user: userData,
         orderedMeals: cartContext.items
       })
     }).catch(e => console.log(e.message()));
+
+    setIsDataSubmitting(false);
+    setWasDataSendingSuccessful(true);
+    cartContext.clearCart();
   };
 
   const cartItems = (
@@ -58,8 +68,8 @@ const Cart = props => {
     </div>
   )
 
-  return (
-    <Modal onHideCart={props.onHideCart}>
+  const cartModalContent = (
+    <React.Fragment>
       {cartItems}
       <div className={styles.total}>
         <span>total</span>
@@ -68,6 +78,25 @@ const Cart = props => {
       {isSubmitOrderAvailable
         ? <SubmitOrder onSubmit={submitOrderHandler} onCancel={props.onHideCart}/>
         : modalButton}
+    </React.Fragment>
+  )
+
+  const dataSubmittingCartModalContent = <p>Sending order data...</p>;
+
+  const dataWasSubmittedCartModalContent = (
+      <React.Fragment>
+        <p>Your order is sent successfully</p>
+        <div className={styles.actions}>
+          <button className={styles["button--alt"]} onClick={props.onHideCart}>close</button>
+        </div>
+      </React.Fragment>
+    )
+
+  return (
+    <Modal onHideCart={props.onHideCart}>
+      {!isDataSubmitting && !wasDataSendingSuccessful && cartModalContent}
+      {isDataSubmitting && dataSubmittingCartModalContent}
+      {wasDataSendingSuccessful && dataWasSubmittedCartModalContent}
     </Modal>
   )
 }
