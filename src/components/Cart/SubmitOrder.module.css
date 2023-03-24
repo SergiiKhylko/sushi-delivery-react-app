@@ -1,0 +1,71 @@
+.form {
+  margin: 1rem 0;
+  height: 15rem;
+  overflow: auto;
+}
+
+.control {
+  margin-bottom: 0.5rem;
+}
+
+.control label {
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.control input {
+  font: inherit;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 20rem;
+  max-width: 100%;
+}
+
+.control p {
+  color: red;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+}
+
+.actions button {
+  font: inherit;
+  color: #222d14;
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid #93af4a;
+  border-radius: 25px;
+  padding: 0.5rem 2rem;
+}
+
+.actions button:hover,
+.actions button:active {
+  background-color: #ccc;
+}
+
+.actions .submit {
+  background-color: #93af4a;
+  border-color: #93af4a;
+  color: white;
+}
+
+.actions .submit:hover,
+.actions .submit:active {
+  background-color: #222d14;
+  border-color: #222d14;
+  color: white;
+}
+
+.invalid label {
+  /*color: red;*/
+}
+
+.invalid input {
+  border-color: red;
+  background-color: #dccccc;
+}
+
+

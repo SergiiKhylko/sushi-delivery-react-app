@@ -1,13 +1,15 @@
-import styles from "./Cart.module.css"
+import styles from "./Cart.module.css";
 import Modal from "../UI/Modal";
-import {useContext} from "react";
+import {useContext, useState} from "react";
 import CartContext from "../../store/cart-context";
 import CartItem from "./CartItem";
+import SubmitOrder from "./SubmitOrder";
 
 const Cart = props => {
   const cartContext = useContext(CartContext);
   const totalAmount = `$${Math.abs(cartContext.totalAmount).toFixed(2)}`;
   const hasItems = cartContext.items.length > 0;
+  const [isSubmitOrderAvailable, setIsSubmitOrderAvailable] = useState(false);
 
   const removeCartItemHandler = id => {
     cartContext.removeItem(id);
@@ -16,6 +18,22 @@ const Cart = props => {
   const addCartItemHandler = item => {
     cartContext.addItem({...item, amount: 1});
   }
+
+  const orderHandler = () => {
+    setIsSubmitOrderAvailable(true);
+  }
+
+  const submitOrderHandler = userData =>  {
+    const endPoint = "https://sushi-delivery-30647-default-rtdb.firebaseio.com/orders.json";
+    console.log("fetch");
+    fetch(endPoint, {
+      method: "POST",
+      body: JSON.stringify({
+        user: userData,
+        orderedMeals: cartContext.items
+      })
+    }).catch(e => console.log(e.message()));
+  };
 
   const cartItems = (
     <ul className={styles['cart-items']}>
@@ -33,6 +51,13 @@ const Cart = props => {
     </ul>
     );
 
+  const modalButton = (
+    <div className={styles.actions}>
+      <button className={styles["button--alt"]} onClick={props.onHideCart}>close</button>
+      {hasItems && <button className={styles.button} onClick={orderHandler}>order</button>}
+    </div>
+  )
+
   return (
     <Modal onHideCart={props.onHideCart}>
       {cartItems}
@@ -40,10 +65,9 @@ const Cart = props => {
         <span>total</span>
         <span>{totalAmount}</span>
       </div>
-      <div className={styles.actions}>
-        <button className={styles["button--alt"]} onClick={props.onHideCart}>close</button>
-        {hasItems && <button className={styles.button}>order</button>}
-      </div>
+      {isSubmitOrderAvailable
+        ? <SubmitOrder onSubmit={submitOrderHandler} onCancel={props.onHideCart}/>
+        : modalButton}
     </Modal>
   )
 }
